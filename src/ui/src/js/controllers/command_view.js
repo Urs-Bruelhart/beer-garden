@@ -210,10 +210,10 @@ export default function commandViewController(
     $scope.jsonValues.form = JSON.stringify($scope.form, undefined, 2);
   };
 
-  $scope.successCallback = function(response) {
-    tempResponse = response;
+  $scope.successCallback = function(system, command) {
+    tempResponse = system;
 
-    $scope.command = response.data;
+    $scope.command = command;
     $scope.jsonValues.command = JSON.stringify($scope.command, undefined, 2);
 
     // If this command has a custom template then we're done!
@@ -289,7 +289,7 @@ export default function commandViewController(
     $scope.response = tempResponse;
   });
 
-  $scope.successCallback(command);
+  $scope.successCallback(system, command);
 
   // /**
   //  * Find a command, then load that command from the server.

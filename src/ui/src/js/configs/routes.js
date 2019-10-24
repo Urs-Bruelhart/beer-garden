@@ -113,12 +113,7 @@ export default function routeConfig($stateProvider, $urlRouterProvider, $locatio
           // if (_.isUndefined(cmd)) {
           //   return $q.reject({status: 404, data: {message: 'No matching command'}});
           // }
-
-          // We already have the command the system, but this is better as it
-          // validates that user has bg-command-read
-          return CommandService.getCommand(cmd.id).catch(
-            (response) => response
-          );
+          return cmd;
         }],
       },
     })
