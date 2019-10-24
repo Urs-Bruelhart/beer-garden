@@ -164,7 +164,7 @@ def _setup_tornado_app():
     # These get documented in our OpenAPI (fka Swagger) documentation
     published_url_specs = [
         # V1
-        (rf"{prefix}api/v1/commands/?", v1.command.CommandListAPI),
+        # (rf"{prefix}api/v1/commands/?", v1.command.CommandListAPI),
         (rf"{prefix}api/v1/requests/?", v1.request.RequestListAPI),
         (rf"{prefix}api/v1/systems/?", v1.system.SystemListAPI),
         (rf"{prefix}api/v1/queues/?", v1.queue.QueueListAPI),
@@ -174,7 +174,7 @@ def _setup_tornado_app():
         (rf"{prefix}api/v1/tokens/?", v1.token.TokenListAPI),
         (rf"{prefix}api/v1/admin/?", v1.admin.AdminAPI),
         (rf"{prefix}api/v1/jobs/?", v1.job.JobListAPI),
-        (rf"{prefix}api/v1/commands/(\w+)/?", v1.command.CommandAPI),
+        # (rf"{prefix}api/v1/commands/(\w+)/?", v1.command.CommandAPI),
         (rf"{prefix}api/v1/instances/(\w+)/?", v1.instance.InstanceAPI),
         (rf"{prefix}api/v1/requests/(\w+)/?", v1.request.RequestAPI),
         (rf"{prefix}api/v1/systems/(\w+)/?", v1.system.SystemAPI),
