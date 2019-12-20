@@ -58,7 +58,7 @@ __all__ = [
     "DateTrigger",
     "CronTrigger",
     "IntervalTrigger",
-    "Namespace"
+    "Namespace",
 ]
 
 
@@ -107,7 +107,7 @@ class Choices(MongoModel, EmbeddedDocument):
                 "the value was not a string" % self.value
             )
         elif self.type == "command" and not isinstance(
-                self.value, (six.string_types, dict)
+            self.value, (six.string_types, dict)
         ):
             raise ModelValidationError(
                 "Error saving choices '%s' - type was 'command' "
@@ -174,7 +174,7 @@ class Parameter(MongoModel, EmbeddedDocument):
             )
 
         if len(self.parameters) != len(
-                set(parameter.key for parameter in self.parameters)
+            set(parameter.key for parameter in self.parameters)
         ):
             raise ModelValidationError(
                 "Can not save Parameter %s: Contains Parameters "
@@ -218,7 +218,7 @@ class Command(MongoModel, Document):
             )
 
         if len(self.parameters) != len(
-                set(parameter.key for parameter in self.parameters)
+            set(parameter.key for parameter in self.parameters)
         ):
             raise ModelValidationError(
                 "Can not save Command %s: Contains Parameters "
@@ -363,8 +363,8 @@ class Request(MongoModel, Document):
             )
 
         if (
-                self.command_type is not None
-                and self.command_type not in BrewtilsRequest.COMMAND_TYPES
+            self.command_type is not None
+            and self.command_type not in BrewtilsRequest.COMMAND_TYPES
         ):
             raise ModelValidationError(
                 "Can not save Request %s: Invalid "
@@ -372,8 +372,8 @@ class Request(MongoModel, Document):
             )
 
         if (
-                self.output_type is not None
-                and self.output_type not in BrewtilsRequest.OUTPUT_TYPES
+            self.output_type is not None
+            and self.output_type not in BrewtilsRequest.OUTPUT_TYPES
         ):
             raise ModelValidationError(
                 "Can not save Request %s: Invalid output "
@@ -413,7 +413,7 @@ class System(MongoModel, Document):
             )
 
         if len(self.instances) != len(
-                set(instance.name for instance in self.instances)
+            set(instance.name for instance in self.instances)
         ):
             raise ModelValidationError(
                 "Can not save System %s: Duplicate instance names" % str(self)

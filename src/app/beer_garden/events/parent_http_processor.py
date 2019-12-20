@@ -41,17 +41,19 @@ class ParentHttpProcessor(EventProcessor):
         if self.registered:
 
             if event.name == "BARTENDER_STARTED":
-                response = requests.patch(self.endpoint + "namespace/" + self.namespace,
-                                          json=SchemaParser.serialize(
-                                              PatchOperation(operation="running"),
-                                              to_string=False)
-                                          )
+                response = requests.patch(
+                    self.endpoint + "namespace/" + self.namespace,
+                    json=SchemaParser.serialize(
+                        PatchOperation(operation="running"), to_string=False
+                    ),
+                )
             elif event.name == "BARTENDER_STOPPED":
-                response = requests.patch(self.endpoint + "namespace/" + self.namespace,
-                                          json=SchemaParser.serialize(
-                                              PatchOperation(operation="stopped"),
-                                              to_string=False)
-                                              )
+                response = requests.patch(
+                    self.endpoint + "namespace/" + self.namespace,
+                    json=SchemaParser.serialize(
+                        PatchOperation(operation="stopped"), to_string=False
+                    ),
+                )
             # else:
             #    requests.post(
             #        self.endpoint + "event", json=SchemaParser.serialize(event, to_string=False)
@@ -59,22 +61,25 @@ class ParentHttpProcessor(EventProcessor):
         else:
             self.events_queue.put(event)
 
-
-
     def register_with_parent(self):
 
         try:
             response = requests.post(
-                self.endpoint + "namespace/"+self.namespace,
-                json=SchemaParser.serialize(Namespace(namespace=self.namespace,
-                                                      status="INITIALIZING",
-                                                      connection_type="https" if self.callback.ssl_enabled else "http",
-                                                      connection_params=self.callback),
-                                            to_string=False)
+                self.endpoint + "namespace/" + self.namespace,
+                json=SchemaParser.serialize(
+                    Namespace(
+                        namespace=self.namespace,
+                        status="INITIALIZING",
+                        connection_type="https"
+                        if self.callback.ssl_enabled
+                        else "http",
+                        connection_params=self.callback,
+                    ),
+                    to_string=False,
+                ),
             )
 
-            if response.status_code in ['200', '201']:
+            if response.status_code in ["200", "201"]:
                 self.registered = True
         except ConnectionError:
             self.registered = False
-
