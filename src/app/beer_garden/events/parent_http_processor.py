@@ -36,6 +36,7 @@ class ParentHttpProcessor(EventProcessor):
 
         self.registered = False
         self.wait_time = 0.1
+        self.connected = False
 
         self._register_with_parent()
 
@@ -48,14 +49,14 @@ class ParentHttpProcessor(EventProcessor):
         :return:
         """
         response = None
-        if not self.registered:
+        if not self.connected:
 
             if event.name == Events.BARTENDER_STOPPED.name:
                 self.clear_queue()
             else:
                 self._register_with_parent()
 
-        if self.registered:
+        if self.connected:
             try:
                 if event.name == Events.BARTENDER_STARTED.name:
                     response = self._patch(
@@ -105,7 +106,7 @@ class ParentHttpProcessor(EventProcessor):
                     pass
             except requests.exceptions.ConnectionError:
                 self.logger.warning("Lost connect with Parent Endpoint: " + self.endpoint)
-                self.registered = False
+                self.connected = False
                 self.wait_time = 0.1
                 self.events_queue.put(event)
 
@@ -139,26 +140,36 @@ class ParentHttpProcessor(EventProcessor):
 
     def _register_with_parent(self):
 
-        try:
-            response = requests.post(
-                self.endpoint + "namespaces/" + self.namespace,
-                json=SchemaParser.serialize(
-                    Namespace(
-                        namespace=self.namespace,
-                        status="INITIALIZING",
-                        connection_type="https"
-                        if self.callback.ssl_enabled
-                        else "http",
-                        connection_params=self.callback,
-                    ),
-                    to_string=False,
-                ),
-            )
 
-            if response.status_code in [200, 201]:
-                self.registered = True
+        try:
+            if not self.registered:
+                response = requests.post(
+                    self.endpoint + "namespaces/" + self.namespace,
+                    json=SchemaParser.serialize(
+                        Namespace(
+                            namespace=self.namespace,
+                            status="INITIALIZING",
+                            connection_type="https"
+                            if self.callback.ssl_enabled
+                            else "http",
+                            connection_params=self.callback,
+                        ),
+                        to_string=False,
+                    ),
+                )
+                if response.status_code in [200, 201]:
+                    self.registered = True
+                    self.connected = True
+            else:
+                response = self._patch(
+                    "namespaces/", self.namespace, [PatchOperation(operation="running")]
+                )
+                if response[0].status_code in [200, 201]:
+                    self.connected = True
+
+
         except requests.exceptions.ConnectionError as ce:
-            self.registered = False
+            self.connected = False
             self.wait_time = min(self.wait_time * 2, 30)
             self.logger.warning("Waiting %.1f seconds before next attempt to register with Parent", self.wait_time)
             self.wait(self.wait_time)
