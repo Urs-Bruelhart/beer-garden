@@ -52,6 +52,13 @@ class EventProcessor(StoppableThread):
         """
         pass
 
+    def clear_queue(self):
+        # Stop accepting events so Beergarden can stop
+
+        # Purge local queue to prevent future processes
+        while not self.events_queue.empty():
+            self.events_queue.get()
+
     def run(self):
         """
         Processes events while Listener is active
