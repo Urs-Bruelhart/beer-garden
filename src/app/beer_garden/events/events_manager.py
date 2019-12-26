@@ -125,21 +125,21 @@ def publish_event(event_type):
                 Events.REQUEST_STARTED.name,
                 Events.REQUEST_COMPLETED.name,
                 Events.SYSTEM_CREATED.name,
+            ):
+                event.payload = result
+            elif event.name in (
+                Events.INSTANCE_UPDATED.name,
+                Events.REQUEST_UPDATED.name,
                 Events.SYSTEM_UPDATED.name,
             ):
-                event.payload = SchemaParser.serialize(result, to_string=False)
+                event.payload = result
+                event.metadata = args[1]
             elif event.name in (Events.QUEUE_CLEARED.name, Events.SYSTEM_REMOVED.name):
                 event.payload = {"id": args[0]}
             elif event.name in (Events.DB_CREATE.name, Events.DB_UPDATE.name):
-                event.payload = {
-                    type(result).schema: SchemaParser.serialize(result, to_string=False)
-                }
+                event.payload = result
             elif event.name in (Events.DB_DELETE.name,):
-                event.payload = {
-                    type(args[0]).schema: SchemaParser.serialize(
-                        args[0], to_string=False
-                    )
-                }
+                event.payload = args[0]
         finally:
             beer_garden.events.events_manager.events_queue.put(event)
 
