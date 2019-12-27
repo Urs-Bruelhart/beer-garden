@@ -905,9 +905,7 @@ _EVENT_SPEC = {
                         },
                         "skip_events": {
                             "type": "list",
-                            'items': {
-                                'name': {'type': 'str'}
-                                },
+                            "items": {"name": {"type": "str"}},
                             "default": [],
                             "required": False,
                             "description": "Events to be skipped",
