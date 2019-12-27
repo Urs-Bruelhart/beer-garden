@@ -903,6 +903,15 @@ _EVENT_SPEC = {
                             "default": "localhost",
                             "description": "Public fully-qualified domain name",
                         },
+                        "skip_events": {
+                            "type": "list",
+                            'items': {
+                                'name': {'type': 'str'}
+                                },
+                            "default": [],
+                            "required": False,
+                            "description": "Events to be skipped",
+                        },
                     },
                 }
             },

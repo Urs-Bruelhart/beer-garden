@@ -31,6 +31,8 @@ class ParentHttpProcessor(EventProcessor):
             config.url_prefix,
         )
 
+        self.skip_events = config.skip_events
+
         self.namespace = namespace
         self.callback = config.callback
 
@@ -40,14 +42,16 @@ class ParentHttpProcessor(EventProcessor):
 
         self._register_with_parent()
 
-
-
     def process_next_message(self, event):
         """
         Sends POST request to endpoint with the Event info.
         :param event: The Event to be processed
         :return:
         """
+
+        if event.name in self.skip_events:
+            return
+
         response = None
         if not self.connected:
 
@@ -70,29 +74,37 @@ class ParentHttpProcessor(EventProcessor):
                 elif event.name == Events.REQUEST_CREATED.name:
                     response = self._post("requests/", event.payload)
                 elif event.name in (
-                    Events.REQUEST_STARTED.name,
-                    Events.REQUEST_UPDATED.name,
-                    Events.REQUEST_COMPLETED.name,
+                        Events.REQUEST_STARTED.name,
+                        Events.REQUEST_UPDATED.name,
+                        Events.REQUEST_COMPLETED.name,
                 ):
                     response = self._patch("requests/", event.payload.id, event.metadata)
+
+                    # Try to create the Request if it didn't exist
+                    if response.status_code == 500:
+                        response = self._post("requests/", event.payload)
 
                 elif event.name == Events.SYSTEM_CREATED.name:
                     response = self._post("systems/", event.payload)
                 elif event.name == Events.SYSTEM_UPDATED.name:
                     responses = self._patch("systems/", event.payload.id, event.metadata)
+
+                    # Try to create the System if it didn't exist
+                    if response.status_code == 500:
+                        response = self._post("systems/", event.payload)
                 elif event.name == Events.SYSTEM_REMOVED.name:
                     response == self._delete("systems/", event.payload.id)
 
                 elif event.name in (
-                    Events.INSTANCE_INITIALIZED.name,
-                    Events.INSTANCE_STARTED.name,
-                    Events.INSTANCE_UPDATED.name,
-                    Events.INSTANCE_STOPPED.name,
+                        Events.INSTANCE_INITIALIZED.name,
+                        Events.INSTANCE_STARTED.name,
+                        Events.INSTANCE_UPDATED.name,
+                        Events.INSTANCE_STOPPED.name,
                 ):
                     responses = self._patch("instances/", event.payload.id, event.metadata)
 
                     if responses[0].status_code == 500:
-                        self._build_system(event)
+                        self._build_system_from_instance(event)
 
                 elif event.name == Events.NAMESPACE_CREATED.name:
                     pass
@@ -132,14 +144,12 @@ class ParentHttpProcessor(EventProcessor):
     def _delete(self, endpoint, uuid):
         return requests.delete(self.endpoint + endpoint + uuid)
 
-
-    def _build_system(self, event):
+    def _build_system_from_instance(self, event):
         # Need to query DB for System Object
         system = db.query_unique(System, instances__contains=event.payload)
         return self._post("systems/", system)
 
     def _register_with_parent(self):
-
 
         try:
             if not self.registered:
